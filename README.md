@@ -16,7 +16,7 @@ Description: Using two separate APIs with YouTube and Vimeo is a pain. Use one. 
 Just do two things:
 
 1. Requirements: Include zebra.js in the `<head>` 
-2. Make a new Zebra instance like var z = new Zebra({options})
+2. Make a new Zebra instance with `var z = new Zebra({options})`
 
 ## Options
 
