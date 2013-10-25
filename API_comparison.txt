@@ -1,0 +1,811 @@
+Video API Docs
+----
+
+YouTube API - https://developers.google.com/youtube/iframe_api_reference
+
+Vimeo API - http://developer.vimeo.com/player/js-api
+
+======
+
+HTML
+
+<!-- YouTube -->
+<div id="youtube_player"></div> 
+
+<!-- Vimeo -->
+<iframe id="vimeo_player" 
+  src="http://player.vimeo.com/video/27855315?api=1&player_id=PLAYER_ID" 
+  width="400" 
+  height="225" 
+  frameborder="0" 
+  webkitAllowFullScreen mozallowfullscreen allowFullScreen>
+</iframe>
+
+======
+
+JS Library
+
+<!-- YouTube: Async script element -->
+<script>
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);  
+</script>
+
+
+<!-- Vimeo: Synchronous script elements required -->
+
+<script src='jQuery.js'></script>
+<script src='froogaloop2.js'></script>
+
+
+======
+
+Instantiate
+
+<!-- YouTube -->
+
+<script>
+  var player;
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+      height: '390',
+      width: '640',
+      videoId: 'M7lc1UVf-VE',
+      playerVars: { 'autoplay': 1, 'controls': 0 },
+      events: {
+        'onReady': onPlayerReady,
+        'onPlaybackQualityChange': onPlayerPlaybackQualityChange,
+        'onStateChange': onPlayerStateChange,
+        'onError': onPlayerError,
+        'onApiChange' : onPlayerApiChange
+      }
+    });
+  }  
+</script>
+
+
+<!-- Vimeo -->
+
+<script>
+  var v_player;
+  $(function(){
+    var iframe = $('#v_player')[0]
+      , status = $('#status');
+
+    v_player = $f(iframe);
+
+    // When the player is ready, add listeners for pause, finish, and playProgress
+    v_player.addEvent('ready', function() {
+      
+      v_player.addEvent('pause', onPause);
+      v_player.addEvent('finish', onFinish);
+      v_player.addEvent('playProgress', onPlayProgress);
+    });
+
+    function onPause(id) {
+      status.text('paused');
+    }
+
+    function onFinish(id) {
+      status.text('finished');
+    }
+
+    function onPlayProgress(data, id) {
+      status.text(data.seconds + 's played');
+    }
+  });
+
+</script>
+
+
+
+======
+
+Player Settings (playerVars)
+
+*Note: The asterisk '*' indicates default
+----------
+
+
+'autohide': 
+0  - progress bar and the controls visible throughout video and in fullscreen
+1  - progress bar and controls will slide invisible, but reappear on user movement
+2* - progress bar fades while controls remain visible
+
+
+
+'autoplay':
+0* - does not autoplay
+1  - autoplays
+
+
+'cc_load_policy':
+none* - based on user YT preference
+1  - show closedcaptions
+
+
+Get Color
+<!-- Vimeo -->
+player.api('getColor', function(value,id){ });
+
+
+Set Color
+<!-- YouTube -->
+'color':
+'red'*  - red progress bar
+'white' - white progress bar
+
+<!-- Vimeo -->
+player.api('setColor','#000000');
+
+
+
+
+
+'controls':
+0  - controls not visible, in Flash: loads & plays immediately
+1* - controls visible, in Flash: only loads immediately
+2  - controls visible, in Flash: only loads when user clicks
+
+
+'disablekb': (Flash only)
+0* - enable keyboard
+1  - disable keyboard
+
+
+'enablejsapi': 
+0* - disable JavaScript API
+1  - enable JavaScript API
+
+
+'end': (Flash only)
+#  - time, measured in seconds from the start of the video, when the player should stop playing the video
+
+
+'fs': (Flash only)
+- impacts fullscreen, setting complicated based on player type loaded
+
+
+'iv_load_policy':
+1* - annotations visible
+3  - annotations not visible
+
+
+'list': (Flash only)
+if 'listType':'search', then - search query
+if 'listType':'user_uploads', then - YouTube user ID
+if 'listType':'playlist', then - 'PL'+YouTube playlist ID
+e.g. - http://www.youtube.com/embed?listType=playlist&list=PLC77007E23FF423C6
+
+
+<!-- YouTube -->
+'loop':
+0* - no loop
+1  - loop video or playlist
+
+<!-- Vimeo -->
+player.api('setLoop',:Boolean)
+
+
+'modestbranding':
+none* - brand shows
+1     - no YouTube logo
+
+
+'origin':
+none* - no extra security
+'http://www.yourdomain.com' - extra security
+
+
+'playerapiid': (Flash only)
+string that can be passed to onYouTubePlayerReady
+
+
+'playlist':
+'comma, separated, list, of video ids, played after VIDEO_ID in URL'
+
+
+'rel':
+0  - do not show related videos at end
+1* - show related videos at end
+
+
+'showinfo':
+0  - do not show video info before play
+1* - show info before play
+
+
+'start':
+# - start playing from # of seconds from beginning of video
+
+
+'theme':
+'dark'* - dark theme
+'light' - light theme
+
+
+
+
+
+======
+
+DOM Manipulation
+----------------
+
+player.getIframe()
+
+- Returns the DOM node for the embedded <iframe>.
+
+
+
+player.destroy()
+
+- Removes the <iframe>
+
+
+
+player.setSize(width:Number, height:Number)
+
+- Sets the size in pixels of the <iframe> that contains the player.
+
+
+======
+
+Prepare Video
+-------------
+
+
+Cue by ID
+
+player.cueVideoById({videoId:String, startSeconds:Number, endSeconds:Number, suggestedQuality:String});
+
+- This function loads the specified video's thumbnail and prepares the player to play the video. The player does not request the FLV until playVideo() or seekTo() is called.
+
+
+
+
+Cue & Play by ID
+
+player.loadVideoById({videoId:String, startSeconds:Number, endSeconds:Number, suggestedQuality:String})
+
+- This function loads and plays the specified video.
+
+
+
+
+Cue by URL
+
+player.cueVideoByUrl({mediaContentUrl:String, startSeconds:Number, endSeconds:Number, suggestedQuality:String})
+
+- This function loads the specified video's thumbnail and prepares the player to play the video. The player does not request the FLV until playVideo() or seekTo() is called.
+
+
+
+
+Cue by URL
+
+player.loadVideoByUrl({mediaContentUrl:String, startSeconds:Number, endSeconds:Number, suggestedQuality:String})
+
+- This function loads and plays the specified video at mediaContentUrl of http://www.youtube.com/v/VIDEO_ID?version=3
+
+
+======
+
+Playlists
+---------
+
+Play Video At
+
+player.playVideoAt(index:Number)
+
+- This function loads and plays the specified video in the playlist.
+
+
+
+
+Cue Playlist
+
+player.cuePlaylist({list:String,listType:String,index:Number,startSeconds:Number,suggestedQuality:String});
+
+- Queues the specified list of videos. The list can be a playlist, a search results feed, or a user's uploaded videos feed. When the list is cued and ready to play, the player will broadcast a video cued event.
+
+
+
+
+Cue & Play Playlist
+
+player.loadPlaylist({list:String,listType:String,index:Number,startSeconds:Number,suggestedQuality:String});
+
+- This function loads the specified list and plays it. The list can be a playlist, a search results feed, or a user's uploaded videos feed.
+
+
+
+
+Get Playlist
+
+player.getPlaylist()
+
+- Returns an array of the video IDs in the playlist as they are currently ordered.
+
+
+
+
+Get Playlist Index
+
+player.getPlaylistIndex()
+
+- Returns the index of the playlist video that is currently playing.
+
+
+
+
+Loop Playlist
+
+player.setLoop(loopPlaylists:Boolean)
+
+- This function indicates whether the video player should continuously play a playlist or if it should stop playing after the last video in the playlist ends.
+
+
+
+
+Shuffle Playlist
+
+player.setShuffle(shufflePlaylist:Boolean)
+
+- This function indicates whether a playlist's videos should be shuffled so that they play back in an order different from the one that the playlist creator designated.
+
+
+Next
+
+player.nextVideo();
+
+- This function loads and plays the next video in the playlist.
+
+
+
+
+Previous
+
+player.previousVideo();
+
+- This function loads and plays the previous video in the playlist.
+
+======
+
+Control Video
+-------------
+
+
+Play
+
+<!-- YouTube -->
+player.playVideo();
+
+- Plays the currently cued/loaded video. The final player state after this function executes will be playing.
+
+<!-- Vimeo -->
+player.api('play');
+
+- Plays the video
+
+
+Pause
+
+<!-- YouTube -->
+player.pauseVideo();
+
+- Pauses the currently playing video. The final player state after this function executes will be paused (2) unless the player is in the ended (0) state when the function is called, in which case the player state will not change.
+
+<!-- Vimeo -->
+player.api('pause');
+
+- Pauses the video.
+
+
+
+Stop
+
+<!-- YouTube -->
+player.stopVideo();
+
+- Stops and cancels loading of the current video. Rarely used. May result in any not-playing state.
+
+<!-- Vimeo -->
+player.api('unload');
+
+- Stops and cancels loading of current video.
+
+
+
+
+Seek
+
+<!-- YouTube -->
+player.seekTo(seconds:Number, allowSeekAhead:Boolean);
+
+- Seeks seconds from start. allowSeekAhead parameter determines whether the player will make a new request to the server if the seconds parameter specifies a time outside of the currently buffered video data.
+
+<!-- Vimeo -->
+player.api('seekTo',seconds:Number);
+
+- Seeks to seconds from start.
+
+
+Clear
+
+<!-- YouTube -->
+
+player.clearVideo(); (HTML5 only)
+
+- Clears the video display. This function is useful if you want to clear the video remnant after calling stopVideo().
+
+
+<!-- Vimeo -->
+player.api('getVideoHeight',function(value,id){ });
+
+- Returns native video height.
+
+
+<!-- Vimeo -->
+player.api('getVideoWidth', function(value,id){ });
+
+ - Return native video width.
+
+
+======
+
+Control Audio
+-------------
+
+player.mute();
+
+- Mutes the player.
+
+
+player.unMute()
+
+- Unmutes the player.
+
+
+player.isMuted()
+
+- Returns true if the player is muted, false if not.
+
+<!-- YouTube -->
+player.setVolume(volume:Number)
+
+- Sets the volume. Accepts an integer between 0 and 100.
+
+<!-- Vimeo -->
+player.api('setVolume',volume:Number)
+
+- Sets volume. Accepts integer between 0 and 1. !IMPORTANT! - diff from YouTube
+
+
+<!-- YouTube -->
+player.getVolume()
+
+- Returns the player's current volume, an integer between 0 and 100. Note that getVolume() will return the volume even if the player is muted.
+
+<!-- Vimeo -->
+player.api('getVolume', function(value,id){ })
+
+- Returns volume between 0 and 1. !IMPORTANT! - diff from YouTube
+
+
+======
+
+
+Speed
+-----
+
+player.getPlaybackRate();
+
+- This function retrieves the playback rate of the currently playing video. The default playback rate is 1, which indicates that the video is playing at normal speed. Playback rates may include values like 0.25, 0.5, 1, 1.5, and 2.
+
+
+player.setPlaybackRate(suggestedRate:Number)
+
+- This function sets the suggested playback rate for the current video.
+
+
+player.getAvailablePlaybackRates()
+
+- This function returns the set of playback rates in which the current video is available. 
+
+
+======
+
+Status
+------
+
+player.getVideoLoadedFraction()
+
+- Returns a number between 0 and 1 that specifies the percentage of the video that the player shows as buffered. 
+
+
+player.getPlayerState()
+
+- Returns a number between 0 and 1 that specifies the percentage of the video that the player shows as buffered. 
+
+<!-- YouTube -->
+player.getCurrentTime()
+
+- Returns the elapsed time in seconds since the video started playing.
+
+<!-- Vimeo -->
+player.api('getCurrentTime', function(value,id){ })
+
+- Returns the elapsed time of the video in seconds. Accurate to 3 decimal places.
+
+
+
+Player Paused?
+
+<!-- YouTube -->
+<script>
+  var myPlayerState;
+  function onPlayerStateChange(event) {
+    myPlayerState = event.data;
+  }
+  function paused(){
+    return myPlayerState == YT.PlayerState.PAUSED;  
+  }
+  
+</script>
+
+<!-- Vimeo -->
+player.api('paused', function(value,id){ })
+
+- returns false if playing, true if paused
+
+======
+
+Quality
+-------
+
+player.getPlaybackQuality()
+
+- It returns undefined if there is no current video. Possible return values are highres, hd1080, hd720, large, medium and small.
+
+
+player.setPlaybackQuality(suggestedQuality:String)
+
+- Causes reload to small, medium, large, hd720, hd1080, highres or default.
+
+
+player.getAvailableQualityLevels()
+
+- Returns an array of strings ordered from highest to lowest quality.
+
+
+======
+
+Meta
+----
+
+Get Duration
+------------
+
+<!-- YouTube -->
+player.getDuration()
+
+- Returns the duration in seconds of the currently playing video.
+
+<!-- Vimeo -->
+player.api('getDuration', function(value,id){ })
+
+- Returns the duration of the video in seconds. Accurate to 3 decimal places after the video’s metadata has been loaded.
+
+
+Get Video URL
+-------------
+
+<!-- YouTube -->
+player.getVideoUrl()
+
+- Returns the YouTube URL for the current video.
+
+<!-- Vimeo -->
+player.api('getVideoUrl', function(value,id){ })
+
+- Returns Vimeo URL for the current video.
+
+
+Get Video Embed Code
+--------------------
+
+<!-- YouTube -->
+player.getVideoEmbedCode()
+
+- Returns embed code.
+
+<!-- Vimeo -->
+player.api('getVideoEmbedCode', function(value,id){ })
+
+- Returns embed code.
+
+
+
+player.getOptions(); // NOTE: Plural
+
+- Returns module names that allow modifications. YouTube only allows 'cc' - closed captioning.
+
+
+player.getOption('cc', 'fontSize' or 'reload' ); // NOTE: Singular
+
+- Returns closed captioning value for reload (null if nothing, true if reload) and fontSize:
+
+-1 : Small
+0  : Default
+1  : Big
+2  : Bigger
+3  : Biggest
+
+
+player.setOption('cc', option, value)
+
+- Set closed captioning value. See .getOption for values.
+
+
+======
+
+Eventing
+--------
+
+
+Listen
+------
+
+<!-- YouTube -->
+player.addEventListener(event:String, listener:String)
+
+- The listener is a string that specifies the function that will execute when the specified event fires.
+
+<!-- Vimeo -->
+addEvent(element, event, function(e){  })
+
+
+* See possible events below
+
+
+
+Events
+------
+
+<!-- YouTube -->
+onReady
+
+- This event fires whenever a player has finished loading and is ready to begin receiving API calls.
+
+<!-- Vimeo -->
+player.addEvent('ready', ready);
+
+- Fired automatically when the player is ready to accept commands.
+
+
+
+<!-- YouTube -->
+onStateChange
+
+- This event fires whenever the player's state changes. The data property of the event object will correspond to the new player state. Possible values are:
+
+-1 (unstarted)
+0 (ended) - YT.PlayerState.ENDED
+1 (playing) - YT.PlayerState.PLAYING
+2 (paused) - YT.PlayerState.PAUSED
+3 (buffering) - YT.PlayerState.BUFFERING
+5 (video cued) - YT.PlayerState.CUED
+
+
+
+<!-- Vimeo -->
+player.addEvent('loadProgress', function(data){ })
+
+- Returns data with percent, bytesLoaded, bytesTotal, and duration.
+
+
+<!-- Vimeo -->
+player.addEvent('playProgress', function(data){ })
+
+- Returns data with seconds, percent, and duration.
+
+<!-- Vimeo -->
+player.addEvent('play',function(data){ })
+
+- Fired when video begins to play.
+
+
+<!-- Vimeo -->
+player.addEvent('pause',function(data){ })
+
+- Fired when video paused.
+
+
+<!-- Vimeo -->
+player.addEvent('finish',function(data){ })
+
+- Fired when video reaches end.
+
+
+<!-- Vimeo -->
+player.addEvent('seek',function(data){ })
+
+- Returns data with seconds, percent, and duration.
+
+
+
+<!-- YouTube -->
+
+onPlaybackQualityChange
+
+- This event fires whenever the video playback quality changes. Possible values are: small, medium, large, hd720, hd1080, or highres.
+
+
+
+onError
+
+- This event fires if an error occurs in the player. Possible values are:
+
+2 - Invalid parameter
+5 - HTML5 error
+100 - Requested video not found
+101 - Embedded player prevented
+150 - Same as 101
+
+
+
+onApiChange
+
+- Often used with player.getOption('cc', 'fontSize' or 'reload' );
+
+
+
+<!-- Vimeo Options -->
+autopause 
+
+- Enables or disables pausing this video when another video is played. Defaults to 1.
+
+
+autoplay  
+
+- Play the video automatically on load. Defaults to 0. Note that this won’t work on some devices.
+
+
+badge 
+
+- Enables or disables the badge on the video. Defaults to 1.
+
+
+byline  
+
+- Show the user’s byline on the video. Defaults to 1.
+
+
+color 
+
+- Specify the color of the video controls. Defaults to 00adef. Make sure that you don’t include the #.
+
+
+loop  
+
+- Play the video again when it reaches the end. Defaults to 0.
+
+
+player_id 
+
+- A unique id for the player that will be passed back with all Javascript API responses.
+
+
+portrait  
+
+- Show the user’s portrait on the video. Defaults to 1.
+
+
+title 
+
+- Show the title on the video. Defaults to 1.
+
+

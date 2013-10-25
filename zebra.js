@@ -333,7 +333,6 @@ function Zebra(options){
         pause: (function(){youtube_player.pauseVideo()}),
         seekTo: (function(seconds){youtube_player.seekTo(seconds)}),
         duration: (function(){youtube_player.getDuration()}),
-        duration: (function(){youtube_player.getDuration()}),
       },
       vimeo:{
         play: (function(){vimeo_player.api('play')}),
