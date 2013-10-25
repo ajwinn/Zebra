@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    
+
+    <script type="text/javascript" src="zebra.js"></script>
+
+    <!-- Instantiate Object -->
+    <script type="text/javascript">
+
+      function duringUpdateTime (current_time) {
+        
+        var span = document.getElementById('time');
+        while( span.firstChild ) {
+          span.removeChild( span.firstChild );
+        }
+        span.appendChild( document.createTextNode(current_time) );
+
+      }
+
+      function duringNote(note){
+        var text = note.text;
+        document.getElementById('note-text').value = text;
+      }
+
+      function duringTimeline(){
+        document.getElementById('note-text').value = '';
+      }
+
+      function onSetNote(note){
+        console.log('i just set:', note);
+      }
+
+      function onRemoveNote(note){
+        console.log('i just removed:', note);
+      }
+
+
+
+      var y = new Zebra({
+          url:'https://www.youtube.com/watch?feature=player_embedded&v=PaOaEjdCkoY', 
+          target:'yt_player', 
+          width:'400',
+          height:'225', 
+          playerVars:{
+            'autohide':2,
+            'autoplay':0,
+            'cc_load_policy':'',
+            'color':'white',
+            'controls':1,
+            'disablekb':0,
+            'end':'',
+            'iv_load_policy':1,
+            'list':'',
+            'listType':'',
+            'playlist':'',
+            'loop':0,
+            'modestBranding':'',
+            'origin':'',
+            'rel':0,
+            'showinfo':1,
+            'start':'',
+            'theme':'light',
+          },
+          duringUpdateTime: duringUpdateTime,
+          duringNote: duringNote,
+          duringTimeline:duringTimeline,
+          onSetNote: onSetNote,
+          onRemoveNote: onRemoveNote
+        });     
+
+
+      var v = new Zebra({
+          url:'http://player.vimeo.com/video/23469566', 
+          target:'v_player', 
+          width:'400',
+          height:'225', 
+          playerVars:{
+            'autoplay':0,
+            'autopause':1,
+            'badge':1,
+            'byline':1,
+            'color':'', //use hex wihtout #
+            'loop':0,
+            'portrait':1,
+            'title':1
+          },
+          duringUpdateTime: duringUpdateTime,
+          duringNote: duringNote,
+          duringTimeline:duringTimeline,
+          onSetNote: onSetNote,
+          onRemoveNote: onRemoveNote
+
+        });
+
+    </script>
+
+  </head>
+  <body>
+
+    <!-- YouTube -->
+    <div id="yt_status">YouTube</div>
+    <div id="yt_player"></div>
+    
+    <!-- Vimeo -->
+    <div id="v_status">Vimeo</div> 
+    <div id="v_player"></div>
+
+  
+    <!-- Test Controls -->
+    <table>
+      <tr>
+        <td>Time:<span id="time"></span></td>
+        <td><input type="text" id="setNote-text"></td>
+        <td><button id="setNote-button">setNote</button></td>
+        <td>
+          <input type="radio" name="player-options" value="y" checked> YouTube<br>
+          <input type="radio" name="player-options" value="v"> Vimeo<br>
+        </td>
+      </tr>
+      <tr>
+        <td>Remove Note At Start Time:</td>
+        <td><input type="text" id="removeNote-text"></td>
+        <td><button id="removeNote-button">removeNote</button></td>
+      </tr>
+      <tr>
+        <td>Note:<input type="text" id="note-text"></td>
+      </tr>
+      <tr>
+        <td>
+          <button id="play">Play</button>
+          <button id="pause">Pause</button>
+        </td>
+        <td>Seek To:<input type="text" id="seekTo-text"></td>
+        
+        <td><button id="seekTo-button">Seek To</button></td>
+      </tr>
+
+    </table>
+
+
+
+    <script>
+
+      /* Functions Primarily for Demo */
+
+      function getPlayer(){
+        var player_string;
+        var options = document.getElementsByName('player-options');
+        for (var i = 0; i < options.length; i++) {
+          var item = options[i];
+          if(item.checked){
+            player_string = item.value;
+          }
+        };
+        var player = window[player_string];
+        return player;
+      }
+
+      function setNote(){
+        var player = getPlayer()
+          , time = player.time
+          , text = document.getElementById('setNote-text').value;
+
+        var note = {
+          start: time,
+          text: text
+        }
+        player.setNote(note);
+      }
+
+      function removeNote(){
+        var player = getPlayer()
+          , time = document.getElementById('removeNote-text').value;
+        player.removeNote(time);
+      }
+
+      function seekTo(){
+        var player = getPlayer()
+          , time = document.getElementById('seekTo-text').value;
+          console.log(time);
+
+        player.seekTo(time);
+        
+      }
+
+      function play(){
+        var player = getPlayer();
+        player.play();
+      }
+
+      function pause(){
+        var player = getPlayer();
+        player.pause();
+      }
+
+      
+      var setNoteButton = document.getElementById('setNote-button');
+      setNoteButton.addEventListener('click',setNote,false);
+
+      var playButton = document.getElementById('play');
+      playButton.addEventListener('click',play,false);        
+
+      var pauseButton = document.getElementById('pause');
+      pauseButton.addEventListener('click',pause,false);
+
+      var seekToButton = document.getElementById('seekTo-button');
+      seekToButton.addEventListener('click',seekTo,false); 
+
+      var removeNoteButton = document.getElementById('removeNote-button');
+      removeNoteButton.addEventListener('click',removeNote,false);        
+      
+
+    </script>
+
+  </body>
+</html>
