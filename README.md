@@ -4,25 +4,25 @@
 Zebra
 =====
 
-The two-toned beast you've been waiting for to handle both YouTube &amp; Vimeo.
+The two-toned beast you've been waiting for to handle both YouTube &amp; Vimeo. See demo [here](http://j.mp/16xheuX).
 
 
 # _Project_
 
-_Description: Using two separate APIs with YouTube and Vimeo is a pain. Use one. Brought to you by a guy at Zerply._
+Description: Using two separate APIs with YouTube and Vimeo is a pain. Use one. Brought to you by a guy at Zerply.
 
 ## Project Setup
 
-_Just do two things:_ 
+Just do two things:
 
-1. _Requirements: Include zebra.js in the `<head>` and make a new Zebra instance_
-2. _See demo [here](http://j.mp/16xheuX). _
+1. Requirements: Include zebra.js in the `<head>` 
+2. Make a new Zebra instance like var z = new Zebra({options})
 
-## Settings
+## Options
 
-_You have access to two sets of configuration variables (YouTube &amp; Vimeo) when you create your the Zebra object. Here are the defaults:_
+Zebra gives you access to all the options the YouTube and Vimeo APIs provide from a single interface.
 
-### Assuming you have HTML like
+### Let's assume you have HTML like:
 
 1. `<div id="youtube_player"></div>`
 
@@ -30,7 +30,7 @@ or
 
 2. `<div id="vimeo_player"></div>`
 
-### Fully Loaded YouTube Configuration/Instantiation
+### Load a YouTube Player
 
     var player = new Zebra({
       url:'https://www.youtube.com/watch?feature=player_embedded&v=PaOaEjdCkoY', 
@@ -64,7 +64,7 @@ or
       onRemoveNote: onRemoveNote
     });
 
-### Fully Loaded Vimeo Configuration/Instantiation
+### Load a Vimeo Player
 
     var player = new Zebra({
       url:'http://player.vimeo.com/video/23469566', 
@@ -89,7 +89,7 @@ or
 
     });
 
-## _Common Commands_
+## Common Commands
 
     player.play()
 
@@ -109,7 +109,9 @@ or
 
 ## _Need More Power?_
 
-_The global variables of the native APIs are still there. Play with the original players using `youtube_player` and `vimeo_player`. Examples if you're familiar with the native APIs: `youtube_player.playVideo()` or `vimeo_player.api('play')`_
+The global variables of the native APIs are still there. Play with the original players using `youtube_player` and `vimeo_player`. 
+
+Examples if you're familiar with the native APIs: `youtube_player.playVideo()` or `vimeo_player.api('play')`
 
 
 ## License
