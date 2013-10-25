@@ -95,7 +95,7 @@ or
 
     player.pause()
     
-    player.addNote({
+    player.setNote({
       start:#,
       end:#,
       text:'string'
@@ -105,6 +105,17 @@ or
     player.removeNote(#_start_seconds)
 
     player.seekTo(#_seconds)
+
+## Callbacks
+
+There are 4 default actions you can set when you create your Zebra instance. The 
+
+1. `duringUpdateTime` - fires while time is updating, returns current time in seconds
+2. `duringNote` - fires while on a note, returns note
+3. `duringTimeline` - fires while on the timeline (not a note), doesn't return anything
+4. `onSetNote` - fires when a note is set, returns the note that is set
+5. `onRemoveNote` - fires when a note is removed, returns the note being removed
+
 
 
 ## _Need More Power?_
