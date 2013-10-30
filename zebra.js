@@ -60,6 +60,9 @@ function Zebra(options){
 
   this.setData = function(key,value){
     this.data[key] = value;
+    if (key == 'time') {
+
+    };
   }
 
 
@@ -79,17 +82,23 @@ function Zebra(options){
   }
 
   this.setNote = function(note){
+    var site = this.getSite();
+    var player = this.getControls(site);
+    var duration = player.duration();
+
     /* set default end to 3 seconds after */
     note.start = parseFloat(note.start) || 0;
     note.end = note.end ? parseFloat(note.end) : note.start + 3;
+
+    note.start_percent = note.start / duration;
+    note.end_percent = note.end / duration;
+
     this.notes.push(note);
 
     /* Custom Callback */
     this.customCallback('onSetNote',note);
 
   }
-
-
 
   this.removeNote = function(seconds){
     var notes = this.notes,
@@ -146,7 +155,7 @@ function Zebra(options){
     }
 
     if (!active_note) {
-      self.customCallback('duringTimeline');
+      self.customCallback('duringTimeline',self.getData('time'));
     };
 
   }
@@ -240,7 +249,9 @@ function Zebra(options){
   /* YT Listeners */
 
   this.onPlayerReady = function(){
-    console.log('youtube ready');
+
+    /* Custom Callback */
+    self.customCallback('onZebraReady', self.options);
   }
 
   this.onPlayerPlaybackQualityChange = function(e){
@@ -293,11 +304,11 @@ function Zebra(options){
 
   /* COMMON Listeners */
 
-  this.time = '';
+  
 
   this.playing = function(data,id){
     self.updateTime(data,id);
-    self.useNote(self.time);
+    self.useNote(self.getData('time'));
   }
 
   this.paused = function(data,id){
@@ -308,19 +319,25 @@ function Zebra(options){
   this.updateTime = function(data,id){
     self.clearAllUsed();
     var site = this.getSite();
+    var player = this.getControls(site);
     switch(self.getSite()){
       case 'youtube':
-        self.time = youtube_player.getCurrentTime();
+        self.setData('time', youtube_player.getCurrentTime());
         break;
       case 'vimeo':
         vimeo_player.api('getCurrentTime',function(value,id){ 
-          self.time = value;
+          self.setData('time',value);
         });
         break;
     }
 
+    var time_data = {};
+    time_data.time = self.getData('time');
+    time_data.duration = player.duration();
+    console.log(time_data.duration);
+
     /* Custom Callback */
-    self.customCallback('duringUpdateTime',self.time);
+    self.customCallback('duringUpdateTime',time_data);
 
   }
 
@@ -332,13 +349,22 @@ function Zebra(options){
         play: (function(){youtube_player.playVideo()}),
         pause: (function(){youtube_player.pauseVideo()}),
         seekTo: (function(seconds){youtube_player.seekTo(seconds)}),
-        duration: (function(){youtube_player.getDuration()}),
+        duration: (function(){
+          var duration = youtube_player.getDuration();
+          return duration;
+        })
       },
       vimeo:{
         play: (function(){vimeo_player.api('play')}),
         pause: (function(){vimeo_player.api('pause')}),
         seekTo: (function(seconds){vimeo_player.api('seekTo',seconds)}),
-        duration: (function(){vimeo_player.getDuration()}),
+        duration: (function(){
+          vimeo_player.api('getDuration',function(v,i){
+            self.setData('duration',v);
+          });
+          var duration = self.getData('duration');
+          return duration;
+        })
       }
     }
     return controls[site];
@@ -411,6 +437,12 @@ function Zebra(options){
       vimeo_player.addEvent('pause', self.paused);
       vimeo_player.addEvent('finish', self.finished);
       vimeo_player.addEvent('playProgress', self.playing);
+
+      self.setData()
+
+      /* Custom Callback */
+      self.customCallback('onZebraReady', self.options);
+
     });
   }
 

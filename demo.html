@@ -2,51 +2,198 @@
 <html>
   <head>
     
+    <style type="text/css">
+
+      div,ul,li{
+        margin: 0px;
+        border: 0px;
+        padding: 0px;
+      }
+
+      .timeline{
+        height: 5px; 
+        width: 800px;
+        background-color: #444444;
+        padding: 0px;
+        margin: 0px;
+        box-sizing: border-box;
+        position: relative;
+      }
+
+      .progress-start{
+        width: 9px;
+        height: 5px;
+        display: inline-block;
+        float: left;
+        background-color: #CC181E;
+      }
+
+      .progress-container{
+        width: 782px;
+        height: 5px;
+        display: inline-block;
+        float: left;
+        position: relative;
+      }
+
+      .progress-end{
+        width: 9px;
+        height: 5px;
+        display: inline-block;
+        float: left;
+        display: inline-block;
+      }
+
+      .progress{
+        width: 0%;
+        height: 5px;
+        background-color: #CC181E;
+        position: absolute;
+      }
+
+      .cuepoint-container{
+        width: 100%;
+        height: 5px;
+        position: relative;
+      }
+
+      .cuepoint{
+        height: 10px; 
+        width: 10px; 
+        border-radius: 5px;
+        background-color: #F09D2E;
+        border: 0px solid #444444;
+        box-sizing: border-box;
+        display: inline-block;
+        position: absolute;
+        top: -2px;
+        left: -9px;
+      }
+
+      .cuepoint:hover{
+        border: 1px solid #444444;
+        cursor: pointer;
+        z-index: 100;
+      }
+
+      .cuepoint-playing{
+        height: 11px; 
+        width: 11px; 
+        border-radius: 6px;
+        background-color: #87AA5F;
+        border: 0px solid #444444;
+        box-sizing: border-box;
+        display: inline-block;
+        position: absolute;
+        top: -2px;
+        left: -5px;
+      }
+
+      .cuepoint-playing:hover{
+        border: 1px solid #444444;
+        cursor: pointer;
+        z-index: 100;
+      }
+
+    </style>
 
     <script type="text/javascript" src="zebra.js"></script>
 
     <!-- Instantiate Object -->
     <script type="text/javascript">
 
-      function duringUpdateTime (current_time) {
-        
+      function duringUpdateTime (time_data) {
+        console.log(time_data);
         var span = document.getElementById('time');
         while( span.firstChild ) {
           span.removeChild( span.firstChild );
         }
-        span.appendChild( document.createTextNode(current_time) );
+        span.appendChild( document.createTextNode(time_data.time) );
+
+        var complete_ratio = time_data.time / time_data.duration;
+        console.log(complete_ratio,time_data);
+        var progress = document.querySelector('.progress');
+        progress.setAttribute('style','width:'+complete_ratio*100+'%');
 
       }
 
       function duringNote(note){
         var text = note.text;
         document.getElementById('note-text').value = text;
+
+        var cuepoint = document.querySelector('[data-start="'+note.start+'"]');
+
+        cuepoint.className = 'cuepoint-playing';
+
+        var all_cuepoints_playing = document.getElementsByClassName('cuepoint-playing');
+        for (var i = 0; i < all_cuepoints_playing.length; i++) {
+          var data_start = all_cuepoints_playing[i].getAttribute('data-start');
+          if (data_start != note.start) {
+            all_cuepoints_playing[i].className = 'cuepoint';
+          };
+        };
+        
+
+      }
+
+      function clearCuepointsPlaying(){
+        var cuepoints = document.getElementsByClassName('cuepoint-playing');
+        for (var i = 0; i < cuepoints.length; i++) {
+          cuepoints[i].className = 'cuepoint';
+        };
       }
 
       function duringTimeline(){
         document.getElementById('note-text').value = '';
+
+        clearCuepointsPlaying();
       }
 
       function onSetNote(note){
         console.log('i just set:', note);
+        /* Create <li>, add attributes, 
+         * add class, append child
+         */
+
+        var newNote = document.createElement('li');
+        for (item in note){
+          newNote.setAttribute('data-'+item,note[item]);
+        }
+        newNote.className = 'cuepoint';
+        
+        var cuepoint_width = 10
+          , half_width = cuepoint_width/2
+          , progress_width = document.querySelector('.progress-container').offsetWidth
+          , percent_half_width = half_width / progress_width;
+
+        var left = (note.start_percent * 100) - (percent_half_width * 100);
+        newNote.setAttribute('style','left:'+left+'%');
+
+        newNote.addEventListener('click',seekToCuepoint,false);
+
+        var cuepoint_container = document.querySelector('.cuepoint-container');
+        cuepoint_container.appendChild(newNote);
       }
 
       function onRemoveNote(note){
         console.log('i just removed:', note);
       }
 
-
+      function onZebraReady(options){
+        console.log('zebra ready, options:',options);
+        /*$('#'+id).after()*/
+      }
 
       var y = new Zebra({
-          url:'https://www.youtube.com/watch?feature=player_embedded&v=PaOaEjdCkoY', 
+          url:'http://www.youtube.com/watch?feature=player_embedded&v=WRrMF73vSNo', 
           target:'yt_player', 
-          width:'400',
-          height:'225', 
+          width:'800',
+          height:'450', 
           playerVars:{
             'autohide':2,
             'autoplay':0,
             'cc_load_policy':'',
-            'color':'white',
+            'color':'red',
             'controls':1,
             'disablekb':0,
             'end':'',
@@ -55,7 +202,7 @@
             'listType':'',
             'playlist':'',
             'loop':0,
-            'modestBranding':'',
+            'modestBranding':1,
             'origin':'',
             'rel':0,
             'showinfo':1,
@@ -66,31 +213,32 @@
           duringNote: duringNote,
           duringTimeline:duringTimeline,
           onSetNote: onSetNote,
-          onRemoveNote: onRemoveNote
+          onRemoveNote: onRemoveNote,
+          onZebraReady: onZebraReady
         });     
 
 
       var v = new Zebra({
           url:'http://player.vimeo.com/video/23469566', 
           target:'v_player', 
-          width:'400',
-          height:'225', 
+          width:'800',
+          height:'450', 
           playerVars:{
             'autoplay':0,
             'autopause':1,
-            'badge':1,
+            'badge':0,
             'byline':1,
-            'color':'', //use hex wihtout #
+            'color':'CC181E', //use hex wihtout #
             'loop':0,
-            'portrait':1,
+            'portrait':0,
             'title':1
           },
           duringUpdateTime: duringUpdateTime,
           duringNote: duringNote,
           duringTimeline:duringTimeline,
           onSetNote: onSetNote,
-          onRemoveNote: onRemoveNote
-
+          onRemoveNote: onRemoveNote,
+          onZebraReady: onZebraReady
         });
 
     </script>
@@ -101,6 +249,17 @@
     <!-- YouTube -->
     <div id="yt_status">YouTube</div>
     <div id="yt_player"></div>
+    <div class="timeline">
+      <div class="progress-start"></div>
+      <div class="progress-container">
+        <div class="progress"></div>
+        <ul class="cuepoint-container">
+          
+        </ul>
+      </div>
+      <div class="progress-end"></div>
+      
+    </div>
     
     <!-- Vimeo -->
     <div id="v_status">Vimeo</div> 
@@ -158,8 +317,9 @@
       }
 
       function setNote(){
+
         var player = getPlayer()
-          , time = player.time
+          , time = player.getData('time')
           , text = document.getElementById('setNote-text').value;
 
         var note = {
@@ -175,13 +335,24 @@
         player.removeNote(time);
       }
 
-      function seekTo(){
+      function seekTo(seekPoint){
+
+        clearCuepointsPlaying();
+
         var player = getPlayer()
-          , time = document.getElementById('seekTo-text').value;
-          console.log(time);
+          , time = seekPoint ? seekPoint : document.getElementById('seekTo-text').value;
 
         player.seekTo(time);
-        
+        player.play();
+
+      }
+
+      function seekToCuepoint(e){
+        var seekPoint = e.target.getAttribute('data-start');
+        console.log('seekPoint:',seekPoint);
+
+        seekTo(seekPoint);
+
       }
 
       function play(){
@@ -208,8 +379,38 @@
       seekToButton.addEventListener('click',seekTo,false); 
 
       var removeNoteButton = document.getElementById('removeNote-button');
-      removeNoteButton.addEventListener('click',removeNote,false);        
+      removeNoteButton.addEventListener('click',removeNote,false); 
+
+
       
+      var Zamboni = {
+
+        zebra : {
+          duringUpdateTime: function(){
+
+          },
+          duringNote: function(){
+
+          },
+          duringTimeline:function(){
+
+          },
+          onSetNote: function(){
+
+          },
+          onRemoveNote: function(){
+
+          },
+          onZebraReady: function(){
+
+          }
+        },
+
+        dom : {
+
+        }
+          
+      };
 
     </script>
 
